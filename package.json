@@ -1,0 +1,26 @@
+{
+  "name": "covid-testing-alexa-flash-briefing",
+  "version": "1.0.0",
+  "description": "This is a open source contribution project that serves a Amazon Alexa Flash Briefing based on data retrieve from The COVID Tracking Project (https://covidtracking.com))",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.658.0",
+    "axios": "^0.19.2",
+    "uuid": "^7.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maksoodmohiuddin/covid-testing-alexa-flash-briefing.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/maksoodmohiuddin/covid-testing-alexa-flash-briefing/issues"
+  },
+  "homepage": "https://github.com/maksoodmohiuddin/covid-testing-alexa-flash-briefing#readme"
+}

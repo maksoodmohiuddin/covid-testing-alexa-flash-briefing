@@ -1,5 +1,16 @@
 
+// npm packages 
 const axios = require("axios");
+const uuidv4 = require("uuid");
+
+// Load the AWS SDK for Node.js
+const AWS = require('aws-sdk');
+// Set the region 
+AWS.config.update({region: 'us-east-1'});
+// set the profile 
+AWS.config.credentials = new AWS.SharedIniFileCredentials({profile: 'magnolia'});
+
+// API Endpoints from The COVID Tracking Project https://covidtracking.com/api
 const currentDataAPI = "https://covidtracking.com/api/v1/us/current.json";
 const previousDataAPI = 'https://covidtracking.com/api/us/daily?date=' + apiFormattedPreviouDate();
 
@@ -28,30 +39,56 @@ function getPreviousData() {
 axios.all([getCurrentData(), getPreviousData()])
   .then(axios.spread(function (currentData, previousData) {
     // Both requests are now complete    
-    currentTotalTestResults = currentData.data[0].totalTestResults;
-    currentNegative = currentData.data[0].negative;
-    currentPositive = currentData.data[0].positive;
+  
+    // current data
+    const currentTotalTestResults = currentData.data[0].totalTestResults;
+    const currentNegative = currentData.data[0].negative;
+    const currentPositive = currentData.data[0].positive;
 
-    previousTotalTestResults = previousData.totalTestResults;
-    previousNegative = previousData.negative;
-    previousPositive = previousData.positive;
+    // previous date date 
+    const previousTotalTestResults = previousData.data.totalTestResults;
+    const previousNegative = previousData.data.negative;
+    const previousPositive = previousData.data.positive;
 
+    // calculations 
+    const usPopulation = 330000000;
+    const percentageTest = parseFloat((currentTotalTestResults / usPopulation) * 100).toFixed(2);
+    const testIncreasePercentage = parseFloat(((currentTotalTestResults - previousTotalTestResults) / previousTotalTestResults) * 100).toFixed(2);
+    const negativeIncreasePercentage = parseFloat(((currentNegative - previousNegative) / previousNegative) * 100).toFixed(2);
+    const positiveIncreasePercentage = parseFloat(((currentPositive - previousPositive) / previousPositive) * 100).toFixed(2);
+
+    // compile JSON object for S3
     let jsonObj = {};
-    jsonObj.uid = '066dc92b-fcf3-4c05-9f25-498b1eb93d45';
-    const formattedDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    jsonObj.uid = uuidv4.v4();
     jsonObj.updateDate = new Date().toUTCString();
+    const formattedDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     jsonObj.titleText = 'Summary of US Covid-19 testing data as of ' + formattedDate;
-    let dataText = 'In US, based on Covid-19 testing data from ' + formattedDate + ' '; 
-    dataText += currentTotalTestResults + ' total test were conducted.'
+    let dataText = 'In US, based on Covid-19 testing data from ' + formattedDate + ', '; 
+    dataText += currentTotalTestResults + ' total test were conducted which represent '; 
+    dataText += percentageTest + '% of estimated 330 million US population. '
+    dataText += currentNegative + ' test were negative and ' + currentPositive + ' teste were postive. '; 
+    dataText += 'Total testing has been increased by ' + testIncreasePercentage  + '% from the day before. ';
+    dataText += 'Negative cases rose by ' + negativeIncreasePercentage; 
+    dataText += '% and positive cases increased by ' + positiveIncreasePercentage + '%';
     jsonObj.mainText = dataText;
 
-    console.log(jsonObj);
-      //"updateDate": "2020-04-16T00:00:00.0Z",
-      //"titleText": 
-      //"mainText": "In US, based on Covid-19 testing data from April 16, 2020, 34230341 total test were conducted. 2756461 tests were negative and 666573 tests were positive.  Total testing has been increased by 4.6% from the day before. Negative cases rose by 4.8% and positive cases increased by 4.8%."
-    //}
-
-
+    console.log(jsonObj);    
+    
+    // Upload updated JSON file to S3  
+    // Create S3 service object
+    s3 = new AWS.S3({apiVersion: '2006-03-01'});
+    s3.putObject({
+      Bucket: 'magnolia-alexa-skills',
+      Key: 'magnoliaflashbriefing.json',
+      Body: JSON.stringify(jsonObj),      
+      ContentType: "application/json",
+      ACL: 'public-read'
+    }, function(err, data) {
+    if (err) {
+      console.log(err);
+    }
+    console.log(data)
+    });
 
   }));
 
