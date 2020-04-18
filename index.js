@@ -60,13 +60,13 @@ axios.all([getCurrentData(), getPreviousData()])
     // compile JSON object for S3
     let jsonObj = {};
     jsonObj.uid = uuidv4.v4();
-    jsonObj.updateDate = new Date().toUTCString();
+    jsonObj.updateDate = new Date().toISOString();
     const formattedDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     jsonObj.titleText = 'Summary of US Covid-19 testing data as of ' + formattedDate;
     let dataText = 'In US, based on Covid-19 testing data from ' + formattedDate + ', '; 
     dataText += currentTotalTestResults + ' total test were conducted which represent '; 
     dataText += percentageTest + '% of estimated 330 million US population. '
-    dataText += currentNegative + ' test were negative and ' + currentPositive + ' teste were postive. '; 
+    dataText += currentNegative + ' test were negative and ' + currentPositive + ' teste were positive. '; 
     dataText += 'Total testing has been increased by ' + testIncreasePercentage  + '% from the day before. ';
     dataText += 'Negative cases rose by ' + negativeIncreasePercentage; 
     dataText += '% and positive cases increased by ' + positiveIncreasePercentage + '%';
