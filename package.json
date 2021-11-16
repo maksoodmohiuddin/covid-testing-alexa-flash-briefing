@@ -4,7 +4,7 @@
   "description": "This is a open source contribution project that serves a Amazon Alexa Flash Briefing based on data retrieve from The COVID Tracking Project (https://covidtracking.com))",
   "main": "index.js",
   "dependencies": {
-    "aws-sdk": "^2.658.0",
+    "aws-sdk": "^2.814.0",
     "axios": "^0.19.2",
     "uuid": "^7.0.3"
   },
